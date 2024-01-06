@@ -5,7 +5,6 @@ name: ci
 on:
     pull_request:
       branches:
-        - main
         - develop
 
 env: #we need to set the tag to the latest tag
