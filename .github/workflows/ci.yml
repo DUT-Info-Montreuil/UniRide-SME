@@ -5,7 +5,7 @@ name: ci
 on:
     pull_request:
       branches:
-        - develop
+        - main
 
 env: #we need to set the tag to the latest tag
   LATEST_TAG: uniride1/uniride_back:latest
