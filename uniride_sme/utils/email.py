@@ -8,7 +8,7 @@ from uniride_sme.utils.exception.exceptions import InvalidInputException
 from uniride_sme.utils.decorator import with_app_context
 
 
-@rq.job  # TODO : add .queue when function called to use redis queue
+@rq.job
 @with_app_context
 def send_email(to, subject, template):
     """Send email"""
@@ -32,7 +32,7 @@ def send_verification_email(student_email, firstname, first_mail=False):
     url = app.config["FRONT_END_URL"] + "email/" + generate_token(student_email)
     with open(file_path, "r", encoding="UTF-8") as html:
         content = html.read().replace("{firstname}", firstname).replace("{url}", url)
-    send_email(student_email, "Vérifier votre adresse e-mail", content)
+    send_email.queue(student_email, "Vérifier votre adresse e-mail", content)
 
 
 def send_password_change_email(student_email, firstname):
@@ -42,7 +42,7 @@ def send_password_change_email(student_email, firstname):
     url = app.config["FRONT_END_URL"] + "change-password/" + generate_token(student_email)
     with open(file_path, "r", encoding="UTF-8") as html:
         content = html.read().replace("{firstname}", firstname).replace("{url}", url)
-    send_email(student_email, "Réinitialiser votre mot de passe", content)
+    send_email.queue(student_email, "Réinitialiser votre mot de passe", content)
 
 
 def send_reservation_response_email(student_email, firstname, trip_id):
@@ -54,7 +54,7 @@ def send_reservation_response_email(student_email, firstname, trip_id):
     with open(file_path, "r", encoding="UTF-8") as html:
         content = html.read().replace("{firstname}", firstname).replace("{url}", url)
 
-    send_email(student_email, "Votre demande de réservation a reçu une réponse", content)
+    send_email.queue(student_email, "Votre demande de réservation a reçu une réponse", content)
 
 
 def send_cancelation_email(student_email, firstname, trip_id):
@@ -66,7 +66,7 @@ def send_cancelation_email(student_email, firstname, trip_id):
     with open(file_path, "r", encoding="UTF-8") as html:
         content = html.read().replace("{firstname}", firstname).replace("{url}", url)
 
-    send_email(student_email, "Votre trajet a été annulé", content)
+    send_email.queue(student_email, "Votre trajet a été annulé", content)
 
 
 def send_document_validation_email(student_email, firstname, document_type, status):
@@ -87,7 +87,7 @@ def send_document_validation_email(student_email, firstname, document_type, stat
             .replace("{status}", status)
         )
 
-    send_email(student_email, f"Votre {document_type['translation']} a été {status}", content)
+    send_email.queue(student_email, f"Votre {document_type['translation']} a été {status}", content)
 
 
 def _get_document_type(document_type):
