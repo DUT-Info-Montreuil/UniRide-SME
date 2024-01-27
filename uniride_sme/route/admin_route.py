@@ -12,6 +12,7 @@ from flask_jwt_extended import (
 )
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from jwt import ExpiredSignatureError
+from uniride_sme.model.dto.admin_dto import AdminInfosDTO
 from uniride_sme.model.dto.trip_dto import TripStatusDTO
 from uniride_sme import app
 from uniride_sme.service import admin_service, documents_service, user_service, trip_service
@@ -24,8 +25,6 @@ from uniride_sme.model.dto.user_dto import (
 from uniride_sme.utils.exception.exceptions import ApiException
 from uniride_sme.utils.exception.user_exceptions import EmailAlreadyVerifiedException, UserNotAUTHORIZED
 from uniride_sme.utils import email
-from uniride_sme.utils.file import get_encoded_file
-from uniride_sme.utils.jwt_token import revoke_token
 from uniride_sme.utils.role_user import RoleUser, role_required
 
 admin = Blueprint("admin", __name__, url_prefix="/admin")
@@ -36,11 +35,26 @@ admin = Blueprint("admin", __name__, url_prefix="/admin")
 def users_informations():
     """Get users information"""
     try:
-        informations_user = admin_service.users_information()
-        response = jsonify({"message": "USER_DISPLAYED_SUCESSFULLY", "users": informations_user}), 200
+        informations_users = admin_service.users_information()  # Assuming this returns a list of users
+        users_list = []
+
+        for user in informations_users:
+            user_dto = AdminInfosDTO(
+                id=user.id,
+                firstname=user.firstname,
+                lastname=user.lastname,
+                role=user.r_id,
+                profile_picture=user.profile_picture,
+                timestamp_creation=user.timestamp_creation,
+                timestamp_modification=user.timestamp_modification,
+            )
+            users_list.append(user_dto)
+
+        response = jsonify({"message": "USERS_DISPLAYED_SUCCESSFULLY", "users": users_list}), 200
     except ApiException as e:
         response = jsonify(message=e.message), e.status_code
     return response
+
 
 
 @admin.route("/user-management/<user_id>", methods=["DELETE"])

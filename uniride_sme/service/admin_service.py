@@ -2,6 +2,7 @@
 from uniride_sme.utils.file import get_encoded_file
 from uniride_sme import app
 from uniride_sme import connect_pg
+from uniride_sme.model.bo.user_bo import UserBO
 from uniride_sme.utils.exception.exceptions import (
     InvalidInputException,
 )
@@ -30,34 +31,36 @@ def count_role_user(role):
     return result[0][0]
 
 
+
 def users_information():
     """Get users information"""
+    query = """
+        SELECT u_id, r_id, u_lastname, u_firstname, u_profile_picture, u_timestamp_creation, u_timestamp_modification
+        FROM uniride.ur_user
+    """
     conn = connect_pg.connect()
-    result = []
+    infos = connect_pg.get_query(conn, query)
+    connect_pg.disconnect(conn)
 
-    try:
-        query = """
-            SELECT u_id, r_id, u_lastname, u_firstname, u_profile_picture, u_timestamp_creation, u_timestamp_modification
-            FROM uniride.ur_user
-        """
-        document = connect_pg.get_query(conn, query)
+    if not infos:
+        raise UserNotFoundException()
 
-        for documents in document:
-            request_data = {
-                "id_user": documents[0],
-                "lastname": documents[2],
-                "firstname": documents[3],
-                "timestamp_creation": documents[5],
-                "last_modified_date": documents[6],
-                "profile_picture": get_encoded_file(documents[4], "PFP_UPLOAD_FOLDER"),
-                "role": documents[1],
-            }
+    user_list = []  # Create an empty list to store UserBO objects
 
-            result.append(request_data)
-    finally:
-        connect_pg.disconnect(conn)
+    for info in infos:
+        user_bo = UserBO(
+            id=info[0],
+            r_id=info[1],
+            lastname=info[2],
+            firstname=info[3],
+            profile_picture=get_encoded_file(info[4], "PFP_UPLOAD_FOLDER"),
+            timestamp_creation=info[5],
+            timestamp_modification=info[6],
+        )
 
-    return result
+        user_list.append(user_bo)  # Append the UserBO object to the list
+    return user_list
+
 
 
 def verify_user(id_user):
