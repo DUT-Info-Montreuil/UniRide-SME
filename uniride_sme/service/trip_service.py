@@ -82,7 +82,7 @@ def validate_total_passenger_count(total_passenger_count) -> None:
         raise InvalidInputException("TOTAL_PASSENGER_COUNT_CANNOT_BE_NEGATIVE")
     # info_car = get_car_info_by_user_id(user_id)
     # if total_passenger_count > info_car[0].get("v_total_places"):
-    if total_passenger_count > 4:
+    if total_passenger_count > 6:
         raise InvalidInputException("TOTAL_PASSENGER_COUNT_TOO_HIGH")
 
 
@@ -936,4 +936,42 @@ def create_daily_trips(
 
     # Commit pour sauvegarder les changements
     conn.commit()
+    connect_pg.disconnect(conn)
+
+
+def modify_trip(trip: TripBO) -> None:
+    """Modify the trip in the database"""
+
+    # Check if the address already exists
+    trip_exists(trip)
+    check_address_existence(trip.departure_address)
+    check_address_existence(trip.arrival_address)
+    validate_total_passenger_count(trip.total_passenger_count)
+    validate_timestamp_proposed(trip.timestamp_proposed)
+    validate_user_id(trip.user_id)
+    validate_address_departure_id_equals_address_arrival_id(
+        trip.departure_address, trip.arrival_address
+    )  # i need this function to check if the trip is viable
+
+    current_trip = get_trip_by_id(trip.id)
+    if current_trip["driver_id"] != trip.user_id:
+        raise ForbiddenException("ONLY_DRIVER_ALLOWED")
+    if current_trip["status"] != TripStatus.PENDING.value:
+        raise ForbiddenException("TRIP_NOT_PENDING")
+
+    query = (
+        "UPDATE uniride.ur_trip set t_total_passenger_count = %s , t_timestamp_proposed = %s , "
+        "t_address_departure_id = %s , t_address_arrival_id = %s WHERE t_id = %s"
+    )
+
+    values = (
+        trip.total_passenger_count,
+        trip.timestamp_proposed,
+        trip.departure_address.id,
+        trip.arrival_address.id,
+        trip.id,
+    )
+
+    conn = connect_pg.connect()
+    connect_pg.execute_command(conn, query, values)
     connect_pg.disconnect(conn)
