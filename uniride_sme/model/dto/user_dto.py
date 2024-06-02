@@ -1,5 +1,5 @@
 """DTO for UserBO"""
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 
 class UserInfosDTO(TypedDict):
@@ -33,6 +33,9 @@ class DriverInfosDTO(TypedDict):
     firstname: str
     lastname: str
     description: str
+    profile_picture: Optional[str]
+    gender: Optional[str]
+    phone_number: Optional[str]
 
 
 class PassengerInfosDTO(TypedDict):
