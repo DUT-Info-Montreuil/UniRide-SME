@@ -17,7 +17,6 @@ from uniride_sme.service.address_service import (
     address_exists,
     check_address_existence,
 )
-from uniride_sme.service.book_service import cancel_trip_booking
 from uniride_sme.utils.exception.exceptions import (
     InvalidInputException,
     MissingInputException,
@@ -980,3 +979,15 @@ def modify_trip(trip: TripBO) -> None:
     connect_pg.disconnect(conn)
 
     cancel_trip_booking(trip.id)
+
+
+def cancel_trip_booking(trip_id):
+    """Cancel all bookings for a trip"""
+    if not trip_id:
+        raise MissingInputException("TRIP_ID_MISSING")
+
+    conn = connect_pg.connect()
+    query = "UPDATE uniride.ur_join SET j_accepted = -1 WHERE t_id = %s"
+    values = (trip_id,)
+    connect_pg.execute_command(conn, query, values)
+    connect_pg.disconnect(conn)
