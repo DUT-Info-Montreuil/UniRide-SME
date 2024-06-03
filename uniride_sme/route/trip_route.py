@@ -284,7 +284,7 @@ def modify_trip():
         )
         trip_service.modify_trip(trip_bo)
 
-        response = jsonify({"message": "TRIP_MODIFIED_SUCCESSFULLY", "trip_id": 1}), 200
+        response = jsonify({"message": "TRIP_MODIFIED_SUCCESSFULLY"}), 200
     except ApiException as e:
         response = jsonify(message=e.message), e.status_code
 

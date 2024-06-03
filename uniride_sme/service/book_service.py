@@ -1,4 +1,5 @@
 """Book service module"""
+
 import random
 from datetime import datetime
 
@@ -332,3 +333,15 @@ def get_booking(trip_id, user_id) -> BookBO:
         verification_code=booking[0]["j_verification_code"],
     )
     return book_bo
+
+
+def cancel_trip_booking(trip_id):
+    """Cancel all bookings for a trip"""
+    if not trip_id:
+        raise MissingInputException("TRIP_ID_MISSING")
+
+    conn = connect_pg.connect()
+    query = "UPDATE uniride.ur_join SET j_accepted = -1 WHERE t_id = %s"
+    values = (trip_id,)
+    connect_pg.execute_command(conn, query, values)
+    connect_pg.disconnect(conn)

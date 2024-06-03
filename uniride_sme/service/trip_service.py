@@ -17,6 +17,7 @@ from uniride_sme.service.address_service import (
     address_exists,
     check_address_existence,
 )
+from uniride_sme.service.book_service import cancel_trip_booking
 from uniride_sme.utils.exception.exceptions import (
     InvalidInputException,
     MissingInputException,
@@ -958,6 +959,8 @@ def modify_trip(trip: TripBO) -> None:
         raise ForbiddenException("ONLY_DRIVER_ALLOWED")
     if current_trip["status"] != TripStatus.PENDING.value:
         raise ForbiddenException("TRIP_NOT_PENDING")
+    if current_trip["passenger_count"] > 0:
+        raise ForbiddenException("TRIP_HAS_PASSENGERS")
 
     query = (
         "UPDATE uniride.ur_trip set t_total_passenger_count = %s , t_timestamp_proposed = %s , "
@@ -975,3 +978,5 @@ def modify_trip(trip: TripBO) -> None:
     conn = connect_pg.connect()
     connect_pg.execute_command(conn, query, values)
     connect_pg.disconnect(conn)
+
+    cancel_trip_booking(trip.id)
