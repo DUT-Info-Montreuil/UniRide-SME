@@ -958,6 +958,8 @@ def modify_trip(trip: TripBO) -> None:
         raise ForbiddenException("ONLY_DRIVER_ALLOWED")
     if current_trip["status"] != TripStatus.PENDING.value:
         raise ForbiddenException("TRIP_NOT_PENDING")
+    if current_trip["passenger_count"] > 0:
+        raise ForbiddenException("TRIP_HAS_PASSENGERS")
 
     query = (
         "UPDATE uniride.ur_trip set t_total_passenger_count = %s , t_timestamp_proposed = %s , "
@@ -973,5 +975,19 @@ def modify_trip(trip: TripBO) -> None:
     )
 
     conn = connect_pg.connect()
+    connect_pg.execute_command(conn, query, values)
+    connect_pg.disconnect(conn)
+
+    cancel_trip_booking(trip.id)
+
+
+def cancel_trip_booking(trip_id):
+    """Cancel all bookings for a trip"""
+    if not trip_id:
+        raise MissingInputException("TRIP_ID_MISSING")
+
+    conn = connect_pg.connect()
+    query = "UPDATE uniride.ur_join SET j_accepted = -1 WHERE t_id = %s"
+    values = (trip_id,)
     connect_pg.execute_command(conn, query, values)
     connect_pg.disconnect(conn)

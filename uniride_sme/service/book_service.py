@@ -1,4 +1,5 @@
 """Book service module"""
+
 import random
 from datetime import datetime
 
