@@ -128,12 +128,39 @@ def _save_document(user_id, file, old_file_name, document_type) -> None:
 
     return file_name
 
+def add_end_date_insurance(end_date_insurance,user_id):
+    """Insert end date of insurance car in the database"""
+    if not user_id:
+        raise MissingInputException("USER_ID_MISSING") 
+    if not end_date_insurance:
+        raise MissingInputException("END_DATE_INSURANCE_MISSING")
+    
+    admin_service.verify_user(user_id)
+    end_date_insurance=datetime.strptime(end_date_insurance, "%Y-%m-%d")
+    if end_date_insurance.date() < datetime.today().date():
+        raise MissingInputException("DATE_START_CANNOT_BE_LOWER_THAN_TODAY")
+    
+    conn = connect_pg.connect()
+
+    query = """
+    WITH first_update AS (
+    UPDATE uniride.ur_documents SET d_insurance_end_date=%s WHERE u_id=%s
+    )
+    UPDATE uniride.ur_document_verification
+        SET v_insurance_verified=0, v_timestamp_modification=CURRENT_TIMESTAMP
+        WHERE u_id=%s;
+    """
+    values = (end_date_insurance, user_id, user_id)
+    connect_pg.execute_command(conn, query, values)
+    connect_pg.disconnect(conn)
+
+
 
 def document_to_verify():
     """Get documents to verify"""
     conn = connect_pg.connect()
     query = """
-        SELECT u_id, v_id, u_lastname, u_firstname, u_profile_picture, d_timestamp_modification,v_license_verified, v_id_card_verified,v_school_certificate_verified, v_insurance_verified
+        SELECT u_id, v_id, u_lastname, u_firstname, u_profile_picture, d_timestamp_modification,v_license_verified, v_id_card_verified,v_school_certificate_verified, v_insurance_verified, d_insurance_end_date
         FROM uniride.ur_document_verification
         NATURAL JOIN uniride.ur_user
         NATURAL JOIN uniride.ur_documents
@@ -144,10 +171,15 @@ def document_to_verify():
 
     # Create a list to store documents with attributes
     result = []
-
+    
     for document in documents:
+        print(document[10])
         if count_zero_and_minus_one(document) > 0:
             formatted_last_modified_date = datetime.strftime(document[5], "%Y-%m-%d %H:%M:%S")
+            if not document[10]:
+                    end_date_insurance=0
+            else :
+                end_date_insurance=datetime.strftime(document[10], "%Y-%m-%d")     
             profile_picture_url = get_encoded_file(document[4], "PFP_UPLOAD_FOLDER")
             request_data = {
                 "request_number": document[1],
@@ -158,6 +190,7 @@ def document_to_verify():
                     "last_name": document[3],
                     "last_modified_date": formatted_last_modified_date,
                     "profile_picture": profile_picture_url,
+                    "end_date_insurance":end_date_insurance
                 },
             }
 
@@ -351,7 +384,7 @@ def document_user(user_id):
     admin_service.verify_user(user_id)
 
     query = """
-        SELECT u_id, d_license, d_id_card, d_school_certificate, d_insurance, v_license_verified, v_id_card_verified, v_school_certificate_verified, v_insurance_verified, v_license_description, v_card_description, v_school_certificate_description, v_insurance_description 
+        SELECT u_id, d_license, d_id_card, d_school_certificate, d_insurance, d_insurance_end_date, v_license_verified, v_id_card_verified, v_school_certificate_verified, v_insurance_verified, v_license_description, v_card_description, v_school_certificate_description, v_insurance_description 
         FROM uniride.ur_document_verification
         NATURAL JOIN uniride.ur_documents
         WHERE u_id = %s
@@ -377,7 +410,6 @@ def document_user(user_id):
             "description": "v_insurance_description",
         },
     }
-
     for document_row in document_data:
         document = []
         for column_name in document_row.keys():
@@ -389,14 +421,28 @@ def document_user(user_id):
                     document_url = document_row[column_name]
                     status_column = f"v_{column_name[2:]}_verified"
                     document_status = document_row.get(status_column, None)
-                    document.append(
-                        {
-                            "url": get_encoded_file(document_url, document_info["folder"]),
-                            "status": str(document_status),
-                            "type": document_type,
-                            "description": document_description,
-                        }
-                    )
+                    insurance_end_date= document_row["d_insurance_end_date"]
+                    
+                    if document_type == "insurance":
+                        document.append(
+                            {
+                                "url": get_encoded_file(document_url, document_info["folder"]),
+                                "status": str(document_status),
+                                "type": document_type,
+                                "description": document_description,
+                                "end_date_insurance":insurance_end_date 
+                            }
+                        )
+                    else:
+                        document.append(
+                            {
+                                "url": get_encoded_file(document_url, document_info["folder"]),
+                                "status": str(document_status),
+                                "type": document_type,
+                                "description": document_description,
+                            }
+                        )
+                        
 
         documents.append({"document": document})
 

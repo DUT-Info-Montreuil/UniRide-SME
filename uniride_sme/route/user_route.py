@@ -291,6 +291,21 @@ def insurance():
     return save_document("insurance")
 
 
+@user.route("/add/end-date", methods=["POST"])
+@jwt_required()
+def add_end_date_insurance():
+    """Add end date of insurance car endpoint."""
+    try:
+        user_id = get_jwt_identity()["id"]
+        json_object = request.json
+        documents_service.add_end_date_insurance( json_object.get("end_date_insurance", None), user_id)
+        response = jsonify(message="ADD_END_DATE_SUCCESSFULLY"), 200
+    except ApiException as e:
+        response = jsonify(message=e.message), e.status_code
+    return response
+
+
+
 @user.route("/email-confirmation", methods=["GET"])
 @jwt_required()
 def send_email_confirmation():

@@ -13,6 +13,7 @@ class DocumentsBO:  # pylint: disable=too-many-instance-attributes
     d_id_card: str
     d_school_certificate: str
     d_insurance: str
+    d_insurance_end_date:datetime
     d_timestamp_addition: datetime
     d_timestamp_modification: datetime
     v_id: int
