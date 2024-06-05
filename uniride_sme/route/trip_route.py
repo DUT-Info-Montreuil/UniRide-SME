@@ -119,6 +119,22 @@ def get_current_driver_trips():
         response = jsonify(message=e.message), e.status_code
     return response
 
+@trip.route("/trip-management/<trip_id>", methods=["DELETE"])
+@role_required(RoleUser.DRIVER)
+def delete_trip_route(trip_id):
+    """Delete trip"""
+    try:
+        trip_service.delete_trip(trip_id)
+        response = jsonify({"message": "TRIP_DELETED_SUCCESSFULLY", "trip_id": trip_id}), 200
+    except ApiException as e:
+        response = jsonify({"message": e.message}), e.status_code
+    except Exception as e:
+        # Catch any other exceptions that may occur
+        response = jsonify({"message": "An unexpected error occurred"}), 500
+    return response
+
+
+
 
 @trip.route("/<trip_id>", methods=["GET"])
 @role_required()
