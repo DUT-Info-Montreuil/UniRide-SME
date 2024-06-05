@@ -729,6 +729,57 @@ def _validate_start_time(departure_date) -> None:
     if departure_date + timedelta(minutes=15) < datetime.now():
         raise ForbiddenException("TOO_LATE_TO_START_TRIP")
 
+def delete_trip(trip_id) -> int:
+    """Delete trip and perform related operations"""
+    conn = connect_pg.connect()
+    try:
+        # Vérifier si t_total_passenger_count est égal à 0
+        check_passenger_query = """
+        SELECT t_total_passenger_count
+        FROM uniride.ur_trip
+        WHERE t_id = %s
+        """
+        check_passenger_values = (trip_id,)
+        
+        cursor = conn.cursor()
+        cursor.execute(check_passenger_query, check_passenger_values)
+        passenger_count = cursor.fetchone()[0]
+        
+        if passenger_count == 0:
+            # Step 1: Delete from ur_join where t_id = %s
+            delete_join_query = """
+            DELETE FROM uniride.ur_join
+            WHERE t_id = %s
+            """
+            delete_join_values = (trip_id,)
+            connect_pg.execute_command(conn, delete_join_query, delete_join_values)
+
+            # Step 2: Delete from ur_trip where t_id = %s
+            delete_trip_query = "DELETE FROM uniride.ur_trip WHERE t_id = %s"
+            delete_trip_values = (trip_id,)
+            connect_pg.execute_command(conn, delete_trip_query, delete_trip_values)
+        else:
+            # Step 3: Update t_status to 2 where t_total_passenger_count > 0
+            update_status_query = """
+            UPDATE uniride.ur_trip
+            SET t_status = 2
+            WHERE t_id = %s
+            """
+            update_status_values = (trip_id,)
+            connect_pg.execute_command(conn, update_status_query, update_status_values)
+
+    except Exception as e:
+        # Handle exceptions, log if necessary
+        print(f"Error occurred: {e}")
+        conn.rollback()
+        raise
+    else:
+        conn.commit()
+    finally:
+        cursor.close()
+        connect_pg.disconnect(conn)
+
+        
 
 def start_trip(trip_id, user_id) -> None:
     """Start the trip"""
