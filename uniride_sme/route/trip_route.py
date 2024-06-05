@@ -123,7 +123,6 @@ def get_current_driver_trips():
 @role_required(RoleUser.DRIVER)
 def delete_trip_route(trip_id):
     """Delete trip"""
-    print("je suis laaaaaaaaaaaaaaaa")
     try:
         trip_service.delete_trip(trip_id)
         response = jsonify({"message": "TRIP_DELETED_SUCCESSFULLY", "trip_id": trip_id}), 200
