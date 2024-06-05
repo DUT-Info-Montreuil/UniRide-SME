@@ -46,7 +46,7 @@ ENV CACHE_REDIS_PORT=6379
 ENV CACHE_REDIS_PASSWORD=''
 ENV CACHE_REDIS_DB=1
 
-ENV FRONT_END_URL=https://srvinfo.iut.univ-paris8.fr:4200
+ENV FRONT_END_URL=https://localhost:4200
 
 # DB config
 ENV DB_HOST=uniride_db
