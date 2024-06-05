@@ -253,3 +253,39 @@ def create_daily_trip():
     except ApiException as e:
         response = jsonify(message=e.message), e.status_code
     return response
+
+
+@trip.route("/modify", methods=["POST"])
+@role_required(RoleUser.DRIVER)
+def modify_trip():
+    """Modify a trip endpoint"""
+    try:
+        user_id = get_jwt_identity()["id"]
+        json_object = request.json
+
+        validate_fields(
+            json_object,
+            {
+                "trip_id": int,
+                "total_passenger_count": int,
+                "timestamp_proposed": str,
+                "address_departure_id": int,
+                "address_arrival_id": int,
+            },
+        )
+
+        trip_bo = TripBO(
+            id=json_object.get("trip_id", None),
+            total_passenger_count=json_object.get("total_passenger_count", None),
+            timestamp_proposed=json_object.get("timestamp_proposed", None).strip(),
+            user_id=user_id,
+            departure_address=AddressBO(id=json_object.get("address_departure_id", None)),
+            arrival_address=AddressBO(id=json_object.get("address_arrival_id", None)),
+        )
+        trip_service.modify_trip(trip_bo)
+
+        response = jsonify({"message": "TRIP_MODIFIED_SUCCESSFULLY"}), 200
+    except ApiException as e:
+        response = jsonify(message=e.message), e.status_code
+
+    return response

@@ -375,6 +375,7 @@ def get_driver_infos(user_id):
             firstname=user_bo.firstname,
             lastname=user_bo.lastname,
             description=user_bo.description,
+            profile_picture=get_encoded_file(user_bo.profile_picture, "PFP_UPLOAD_FOLDER")
         )
         response = jsonify(user_infos_dto), 200
     except ApiException as e:
@@ -385,7 +386,7 @@ def get_driver_infos(user_id):
 
 @user.route("/default-profile-picture", methods=["GET"])
 def get_default_profile_picture():
-    """Get default profile picture""" ""
+    """Get default profile picture"""
     return send_file(
         f"{app.config['PATH']}/resource/default_profile_picture.png",
         download_name="default_profile_picture.png",
@@ -400,6 +401,29 @@ def get_label(trip_id):
         user_id = get_jwt_identity()["id"]
         data = user_service.get_label(trip_id, user_id)
         response = jsonify({"label": data}), 200
+    except ApiException as e:
+        response = jsonify(message=e.message), e.status_code
+    return response
+
+@user.route("/infos/<user_id>", methods=["GET"])
+@role_required()
+def user_information_token(user_id):
+    """Informations user by token"""
+    try:
+        user_bo = user_service.get_user_by_id(user_id)
+        user_infos_dto = DriverInfosDTO(
+                    id=user_bo.id,
+                    firstname=user_bo.firstname,
+                    lastname=user_bo.lastname,
+                    gender=user_bo.gender,
+                    phone_number=user_bo.phone_number,
+                    description=user_bo.description,
+                    profile_picture=get_encoded_file(user_bo.profile_picture, "PFP_UPLOAD_FOLDER")
+        )
+        response = (
+            jsonify({"message": "USER_INFORMATIONS_DISPLAYED_SUCESSFULLY", "user_information": user_infos_dto}),
+            200,
+        )
     except ApiException as e:
         response = jsonify(message=e.message), e.status_code
     return response

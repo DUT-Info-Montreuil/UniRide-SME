@@ -1,4 +1,5 @@
 """Car service module"""
+
 import psycopg2 as psy
 from uniride_sme import connect_pg
 from uniride_sme.model.bo.car_bo import CarBO
@@ -98,7 +99,7 @@ def validate_total_places(total_places) -> None:
         raise MissingInputException("TOTAL_PLACES_CANNOT_BE_NULL")
     if total_places < 0:
         raise InvalidInputException("TOTAL_PLACES_CANNOT_BE_NEGATIVE")
-    if total_places > 4:
+    if total_places > 6:
         raise InvalidInputException("TOTAL_PLACES_TOO_HIGH")
 
 
