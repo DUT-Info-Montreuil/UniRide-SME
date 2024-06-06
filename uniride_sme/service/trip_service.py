@@ -729,6 +729,7 @@ def _validate_start_time(departure_date) -> None:
     if departure_date + timedelta(minutes=15) < datetime.now():
         raise ForbiddenException("TOO_LATE_TO_START_TRIP")
 
+
 def delete_trip(trip_id) -> int:
     """Delete trip and perform related operations"""
     conn = connect_pg.connect()
@@ -740,11 +741,11 @@ def delete_trip(trip_id) -> int:
         WHERE t_id = %s
         """
         check_passenger_values = (trip_id,)
-        
+
         cursor = conn.cursor()
         cursor.execute(check_passenger_query, check_passenger_values)
         passenger_count = cursor.fetchone()[0]
-        
+
         if passenger_count == 0:
             # Step 1: Delete from ur_join where t_id = %s
             delete_join_query = """
@@ -779,7 +780,6 @@ def delete_trip(trip_id) -> int:
         cursor.close()
         connect_pg.disconnect(conn)
 
-        
 
 def start_trip(trip_id, user_id) -> None:
     """Start the trip"""

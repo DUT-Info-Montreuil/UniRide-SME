@@ -298,12 +298,11 @@ def add_end_date_insurance():
     try:
         user_id = get_jwt_identity()["id"]
         json_object = request.json
-        documents_service.add_end_date_insurance( json_object.get("end_date_insurance", None), user_id)
+        documents_service.add_end_date_insurance(json_object.get("end_date_insurance", None), user_id)
         response = jsonify(message="ADD_END_DATE_SUCCESSFULLY"), 200
     except ApiException as e:
         response = jsonify(message=e.message), e.status_code
     return response
-
 
 
 @user.route("/email-confirmation", methods=["GET"])
@@ -375,7 +374,7 @@ def get_driver_infos(user_id):
             firstname=user_bo.firstname,
             lastname=user_bo.lastname,
             description=user_bo.description,
-            profile_picture=get_encoded_file(user_bo.profile_picture, "PFP_UPLOAD_FOLDER")
+            profile_picture=get_encoded_file(user_bo.profile_picture, "PFP_UPLOAD_FOLDER"),
         )
         response = jsonify(user_infos_dto), 200
     except ApiException as e:
@@ -405,6 +404,7 @@ def get_label(trip_id):
         response = jsonify(message=e.message), e.status_code
     return response
 
+
 @user.route("/infos/<user_id>", methods=["GET"])
 @role_required()
 def user_information_token(user_id):
@@ -412,13 +412,13 @@ def user_information_token(user_id):
     try:
         user_bo = user_service.get_user_by_id(user_id)
         user_infos_dto = DriverInfosDTO(
-                    id=user_bo.id,
-                    firstname=user_bo.firstname,
-                    lastname=user_bo.lastname,
-                    gender=user_bo.gender,
-                    phone_number=user_bo.phone_number,
-                    description=user_bo.description,
-                    profile_picture=get_encoded_file(user_bo.profile_picture, "PFP_UPLOAD_FOLDER")
+            id=user_bo.id,
+            firstname=user_bo.firstname,
+            lastname=user_bo.lastname,
+            gender=user_bo.gender,
+            phone_number=user_bo.phone_number,
+            description=user_bo.description,
+            profile_picture=get_encoded_file(user_bo.profile_picture, "PFP_UPLOAD_FOLDER"),
         )
         response = (
             jsonify({"message": "USER_INFORMATIONS_DISPLAYED_SUCESSFULLY", "user_information": user_infos_dto}),
