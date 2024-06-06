@@ -1,4 +1,7 @@
-FROM python:3.10
+# Overridable default docker registry
+ARG registry=docker.io
+
+FROM ${registry}/library/python:3.10
 
 WORKDIR /usr/src/app
 
