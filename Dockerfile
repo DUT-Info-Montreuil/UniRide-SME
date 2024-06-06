@@ -1,4 +1,6 @@
-FROM python:3.10
+ARG registry=docker.io
+
+FROM ${registry}/librairy/python:3.10
 
 WORKDIR /usr/src/app
 
