@@ -173,7 +173,6 @@ def document_to_verify():
     result = []
     
     for document in documents:
-        print(document[10])
         if count_zero_and_minus_one(document) > 0:
             formatted_last_modified_date = datetime.strftime(document[5], "%Y-%m-%d %H:%M:%S")
             if not document[10]:
