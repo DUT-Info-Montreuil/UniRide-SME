@@ -1,6 +1,7 @@
 """File related functions"""
-import os
 import base64
+import os
+
 from uniride_sme import app
 from uniride_sme.utils.exception.exceptions import FileException
 

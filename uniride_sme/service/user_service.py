@@ -1,21 +1,19 @@
 """User service module"""
 import re
+
 import bcrypt
+
 from uniride_sme import app, connect_pg
 from uniride_sme.model.bo.user_bo import UserBO
+from uniride_sme.service import admin_service
 from uniride_sme.service.documents_service import update_role
 from uniride_sme.service.trip_service import get_trip_by_id
-from uniride_sme.service import admin_service
-from uniride_sme.utils.file import save_file, delete_file
-from uniride_sme.utils.exception.exceptions import (
-    InvalidInputException,
-    MissingInputException,
-)
+from uniride_sme.utils.exception.exceptions import (InvalidInputException,
+                                                    MissingInputException)
 from uniride_sme.utils.exception.user_exceptions import (
-    UserNotFoundException,
-    PasswordIncorrectException,
-    AttributeUnchangedException,
-)
+    AttributeUnchangedException, PasswordIncorrectException,
+    UserNotFoundException)
+from uniride_sme.utils.file import delete_file, save_file
 
 
 def authenticate(login, password) -> UserBO:

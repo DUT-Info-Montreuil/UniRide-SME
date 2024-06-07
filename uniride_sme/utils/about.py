@@ -1,5 +1,6 @@
 """About utilities"""
 import os
+
 from uniride_sme import app
 
 

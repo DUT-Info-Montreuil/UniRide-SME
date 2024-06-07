@@ -1,11 +1,13 @@
 """Email related functions"""
 import os
+
 from flask_mail import Message
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
+from itsdangerous import (BadTimeSignature, SignatureExpired,
+                          URLSafeTimedSerializer)
 
 from uniride_sme import app, mail, rq
-from uniride_sme.utils.exception.exceptions import InvalidInputException
 from uniride_sme.utils.decorator import with_app_context
+from uniride_sme.utils.exception.exceptions import InvalidInputException
 
 
 @rq.job  # TODO : add .queue when function called to use redis queue
@@ -20,6 +22,16 @@ def send_email(to, subject, template):
     )
     mail.send(msg)
     print("Email sent")
+
+
+def send_insurance_expiration_email(student_email, firstname):
+    """Send insurance expiration email"""
+    file_path = os.path.join(app.config["PATH"], "resource/email/email_expiration_insurance_template.html")
+
+    url = app.config["FRONT_END_URL"] + "renew-insurance"
+    with open(file_path, "r", encoding="UTF-8") as html:
+        content = html.read().replace("{firstname}", firstname).replace("{url}", url)
+    send_email(student_email, "Votre assurance arrive à expiration", content)
 
 
 def send_verification_email(student_email, firstname, first_mail=False):

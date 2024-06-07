@@ -4,16 +4,19 @@
 import json
 import os
 from datetime import datetime
+
 from flask import jsonify
-from flask_jwt_extended import get_jwt, get_jwt_identity, create_access_token, set_access_cookies
+from flask_jwt_extended import (create_access_token, get_jwt, get_jwt_identity,
+                                set_access_cookies)
+
 from uniride_sme import app
-from uniride_sme.route.user_route import user
-from uniride_sme.route.admin_route import admin
-from uniride_sme.route.trip_route import trip
-from uniride_sme.route.address_route import address
-from uniride_sme.route.car_route import car
-from uniride_sme.route.book_route import book
 from uniride_sme.route.about_route import about
+from uniride_sme.route.address_route import address
+from uniride_sme.route.admin_route import admin
+from uniride_sme.route.book_route import book
+from uniride_sme.route.car_route import car
+from uniride_sme.route.trip_route import trip
+from uniride_sme.route.user_route import user
 
 
 @app.after_request

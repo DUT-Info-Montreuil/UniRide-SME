@@ -1,8 +1,8 @@
 """Implementation of RouteChecker using OpenStreetMap""" ""
 import requests
 
-from uniride_sme.utils.cartography.route_checker import RouteChecker
 from uniride_sme import app
+from uniride_sme.utils.cartography.route_checker import RouteChecker
 
 
 class OpenStreetMapRouteChecker(RouteChecker):

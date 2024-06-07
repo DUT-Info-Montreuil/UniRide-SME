@@ -1,12 +1,13 @@
 """Book related routes"""
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity
+
+from uniride_sme.model.dto.book_dto import BookResponseDTO
 from uniride_sme.service import book_service, user_service
 from uniride_sme.utils import email
 from uniride_sme.utils.exception.exceptions import ApiException
 from uniride_sme.utils.field import validate_fields
-from uniride_sme.model.dto.book_dto import BookResponseDTO
 from uniride_sme.utils.role_user import RoleUser, role_required
 
 book = Blueprint("book", __name__, url_prefix="/book")

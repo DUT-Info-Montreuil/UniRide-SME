@@ -1,6 +1,6 @@
 """User business owner"""
-from datetime import datetime
 import dataclasses
+from datetime import datetime
 
 
 @dataclasses.dataclass

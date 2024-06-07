@@ -1,13 +1,13 @@
 """Admin service module"""
+from datetime import datetime
+
 from uniride_sme import connect_pg
-from uniride_sme.utils.exception.exceptions import (
-    InvalidInputException,
-)
+from uniride_sme.utils import email
+from uniride_sme.utils.exception.criteria_exceptions import \
+    TooManyCriteriaException
+from uniride_sme.utils.exception.exceptions import InvalidInputException
 from uniride_sme.utils.exception.user_exceptions import (
-    UserNotFoundException,
-    RatingNotFoundException,
-)
-from uniride_sme.utils.exception.criteria_exceptions import TooManyCriteriaException
+    RatingNotFoundException, UserNotFoundException)
 from uniride_sme.utils.file import get_encoded_file
 
 
@@ -440,3 +440,26 @@ def average_rating_user_id(id_user) -> float:
     result = connect_pg.get_query(conn, query, (id_user,))
     connect_pg.disconnect(conn)
     return result[0][0]
+
+
+def update_insurance_verified(id_user):
+    """update insurance status verified"""
+    conn = connect_pg.connect()
+    query = "UPDATE uniride.ur_document_verification SET v_insurance_verified=0 WHERE u_id = %s"
+    connect_pg.execute_command(conn, query, (id_user,))
+    connect_pg.disconnect(conn)
+
+
+def get_end_date_insurance():
+    """Get end date insurance and user info"""
+    conn = connect_pg.connect()
+    query = """
+    SELECT u_id,d_insurance_end_date FROM uniride.ur_documents
+    """
+    result = connect_pg.get_query(conn, query)
+    connect_pg.disconnect(conn)
+    for row in result:
+        u_id = row[0]
+        end_date_insurance = row[1]
+        if end_date_insurance == datetime.today().date():
+            update_insurance_verified(u_id)

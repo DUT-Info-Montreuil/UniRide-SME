@@ -1,9 +1,10 @@
 """Implementation of RouteChecker using Google Maps API"""
 from datetime import datetime
+
 import googlemaps
 
-from uniride_sme.utils.cartography.route_checker import RouteChecker
 from uniride_sme import app
+from uniride_sme.utils.cartography.route_checker import RouteChecker
 
 
 class GoogleMapsRouteChecker(RouteChecker):

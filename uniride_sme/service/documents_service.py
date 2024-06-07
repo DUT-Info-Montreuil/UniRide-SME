@@ -1,12 +1,14 @@
 """Documents service module"""
 import os
 from datetime import datetime
+
 from uniride_sme import app, connect_pg
 from uniride_sme.model.bo.documents_bo import DocumentsBO
-from uniride_sme.utils.file import save_file, delete_file, get_encoded_file
-from uniride_sme.service import user_service, admin_service
+from uniride_sme.service import admin_service, user_service
+from uniride_sme.utils.exception.documents_exceptions import (
+    DocumentsNotFoundException, DocumentsTypeException)
 from uniride_sme.utils.exception.exceptions import MissingInputException
-from uniride_sme.utils.exception.documents_exceptions import DocumentsNotFoundException, DocumentsTypeException
+from uniride_sme.utils.file import delete_file, get_encoded_file, save_file
 
 
 def get_documents_by_user_id(user_id) -> DocumentsBO:
@@ -449,3 +451,4 @@ def document_user(user_id):
         "user_id": user_id,
         "documents": documents,
     }
+
