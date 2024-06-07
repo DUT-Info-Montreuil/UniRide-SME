@@ -93,18 +93,6 @@ COPY . .
 
 RUN pip install -e .
 
-RUN apt-get update \
-    && apt-get install curl
-RUN mkdir /usr/src/app/uniride_sme/certs
-
-RUN curl \
-    -o /usr/src/app/uniride_sme/certs/flask-selfsigned.crt \
-    'https://pastebin.com/raw/853gU6nq'
-
-RUN curl \
-    -o /usr/src/app/uniride_sme/certs/flask-selfsigned.key \
-    'https://pastebin.com/raw/FS2Dv8hp'
-
 # Set timezone to Paris, France
 ENV TZ=Europe/Paris
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
