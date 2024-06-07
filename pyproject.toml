@@ -1,6 +1,6 @@
 [project]
 name = "uniride-sme"
-version = "4.0.2"
+version = "4.1.0"
 description = "Backend of UniRide"
 authors = [
     {name = "Gregoire FAURE"},
@@ -26,7 +26,8 @@ dependencies = [
   "bcrypt",
   "googlemaps",
   "requests",
-  "setuptools",]
+  "setuptools",
+  "schedule",]
 
 [project.optional-dependencies]
 dev = [
@@ -35,7 +36,8 @@ dev = [
     "black==22.10.0",
     "coverage[toml]==7.2.6",
     "pycodestyle==2.10.0",
-    "pylint>=2.15.16",]
+    "pylint>=2.15.16",
+    "schedule>=1.2.2",]
 
 [tool.black]
 line-length = 120

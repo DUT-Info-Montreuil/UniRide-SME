@@ -1,10 +1,17 @@
 """Admin route"""
-from flask import Blueprint, request, jsonify
+import threading
+
+from flask import Blueprint, jsonify, request
+
+from uniride_sme import app
 from uniride_sme.model.dto.trip_dto import TripStatusDTO
-from uniride_sme.service import admin_service, documents_service, user_service, trip_service
 from uniride_sme.model.dto.user_dto import InformationsStatUsers
-from uniride_sme.utils.exception.exceptions import ApiException
+from uniride_sme.service import (admin_service, documents_service,
+                                 trip_service, user_service)
 from uniride_sme.utils import email
+from uniride_sme.utils.background_task.cron import (background_task,
+                                                    thread_event)
+from uniride_sme.utils.exception.exceptions import ApiException
 from uniride_sme.utils.role_user import RoleUser, role_required
 
 admin = Blueprint("admin", __name__, url_prefix="/admin")
@@ -260,3 +267,37 @@ def get_actif_criterian(r_id):
     except ApiException as e:
         response = jsonify(message=e.message), e.status_code
     return response
+
+
+@admin.route("/cron/insurance/start", methods=["POST"])
+@role_required(RoleUser.ADMINISTRATOR)
+def start_background_task():
+    try:
+        thread_event.set()
+        thread = threading.Thread(target=background_task)
+        thread.start()
+        app.config["CRON_INSURANCE"] = True
+
+        return "Background task started!"
+    except ApiException as e:
+        response = jsonify(message=e.message), e.status_code
+    return response
+
+
+@admin.route("/cron/insurance/stop", methods=["POST"])
+@role_required(RoleUser.ADMINISTRATOR)
+def stop_background_task():
+    try:
+        thread_event.clear()
+        app.config["CRON_INSURANCE"] = False
+
+        return "Background task stopped!"
+    except Exception as error:
+        return str(error)
+
+
+@admin.route("/cron/insurance/status", methods=["GET"])
+@role_required(RoleUser.ADMINISTRATOR)
+def status_cron_insurance_status():
+
+    return jsonify({"message": "CRON_INSURANCE_STATUS", "status": app.config["CRON_INSURANCE"]}), 200

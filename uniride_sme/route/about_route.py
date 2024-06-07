@@ -1,8 +1,9 @@
 """About route module."""
 
 from flask import Blueprint, jsonify
-from uniride_sme.utils.exception.exceptions import ApiException
+
 from uniride_sme.utils import about as about_utils
+from uniride_sme.utils.exception.exceptions import ApiException
 
 about = Blueprint("about", __name__, url_prefix="/about")
 

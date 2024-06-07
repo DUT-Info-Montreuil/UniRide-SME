@@ -1,9 +1,10 @@
 """Configure database connection"""
 # !/usr/bin/python
-from configparser import ConfigParser, NoSectionError
 import dataclasses
 import os
+from configparser import ConfigParser, NoSectionError
 from datetime import timedelta
+
 from dotenv import load_dotenv
 
 
@@ -20,6 +21,7 @@ class Config:
     # Mail config
     MAIL_SERVER = os.getenv("MAIL_SERVER")
     MAIL_PORT = 465
+    CRON_INSURANCE = False
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
     MAIL_DEBUG = False

@@ -3,33 +3,30 @@
 from datetime import datetime, timedelta
 from math import ceil
 from typing import List
+
 from psycopg2.extras import execute_values
 
 from uniride_sme import app, connect_pg
-from uniride_sme.model.bo.trip_bo import TripBO
-from uniride_sme.model.dto.trip_dto import TripDTO, TripDetailedDTO, PassengerTripDTO
 from uniride_sme.model.bo.address_bo import AddressBO
+from uniride_sme.model.bo.trip_bo import TripBO
 from uniride_sme.model.dto.address_dto import AddressDTO, AddressSimpleDTO
-from uniride_sme.model.dto.user_dto import PassengerInfosDTO, PassengerEmailsDTO
+from uniride_sme.model.dto.trip_dto import (PassengerTripDTO, TripDetailedDTO,
+                                            TripDTO)
+from uniride_sme.model.dto.user_dto import (PassengerEmailsDTO,
+                                            PassengerInfosDTO)
 from uniride_sme.service.address_service import (
-    check_address_exigeance,
-    set_latitude_longitude_from_address,
-    address_exists,
-    check_address_existence,
-)
-from uniride_sme.utils.exception.exceptions import (
-    InvalidInputException,
-    MissingInputException,
-    ForbiddenException,
-)
-from uniride_sme.utils.exception.address_exceptions import InvalidIntermediateAddressException
+    address_exists, check_address_exigeance, check_address_existence,
+    set_latitude_longitude_from_address)
+from uniride_sme.utils.exception.address_exceptions import \
+    InvalidIntermediateAddressException
+from uniride_sme.utils.exception.exceptions import (ForbiddenException,
+                                                    InvalidInputException,
+                                                    MissingInputException)
 from uniride_sme.utils.exception.trip_exceptions import (
-    TripAlreadyExistsException,
-    TripNotFoundException,
-)
-from uniride_sme.utils.trip_status import TripStatus
-from uniride_sme.utils.maths_formulas import haversine
+    TripAlreadyExistsException, TripNotFoundException)
 from uniride_sme.utils.file import get_encoded_file
+from uniride_sme.utils.maths_formulas import haversine
+from uniride_sme.utils.trip_status import TripStatus
 
 
 def add_trip(trip: TripBO) -> None:
@@ -82,7 +79,7 @@ def validate_total_passenger_count(total_passenger_count) -> None:
         raise InvalidInputException("TOTAL_PASSENGER_COUNT_CANNOT_BE_NEGATIVE")
     # info_car = get_car_info_by_user_id(user_id)
     # if total_passenger_count > info_car[0].get("v_total_places"):
-    if total_passenger_count > 4:
+    if total_passenger_count > 6:
         raise InvalidInputException("TOTAL_PASSENGER_COUNT_TOO_HIGH")
 
 
@@ -730,6 +727,57 @@ def _validate_start_time(departure_date) -> None:
         raise ForbiddenException("TOO_LATE_TO_START_TRIP")
 
 
+def delete_trip(trip_id) -> int:
+    """Delete trip and perform related operations"""
+    conn = connect_pg.connect()
+    try:
+        # Vérifier si t_total_passenger_count est égal à 0
+        check_passenger_query = """
+        SELECT t_total_passenger_count
+        FROM uniride.ur_trip
+        WHERE t_id = %s
+        """
+        check_passenger_values = (trip_id,)
+
+        cursor = conn.cursor()
+        cursor.execute(check_passenger_query, check_passenger_values)
+        passenger_count = cursor.fetchone()[0]
+
+        if passenger_count == 0:
+            # Step 1: Delete from ur_join where t_id = %s
+            delete_join_query = """
+            DELETE FROM uniride.ur_join
+            WHERE t_id = %s
+            """
+            delete_join_values = (trip_id,)
+            connect_pg.execute_command(conn, delete_join_query, delete_join_values)
+
+            # Step 2: Delete from ur_trip where t_id = %s
+            delete_trip_query = "DELETE FROM uniride.ur_trip WHERE t_id = %s"
+            delete_trip_values = (trip_id,)
+            connect_pg.execute_command(conn, delete_trip_query, delete_trip_values)
+        else:
+            # Step 3: Update t_status to 2 where t_total_passenger_count > 0
+            update_status_query = """
+            UPDATE uniride.ur_trip
+            SET t_status = 2
+            WHERE t_id = %s
+            """
+            update_status_values = (trip_id,)
+            connect_pg.execute_command(conn, update_status_query, update_status_values)
+
+    except Exception as e:
+        # Handle exceptions, log if necessary
+        print(f"Error occurred: {e}")
+        conn.rollback()
+        raise
+    else:
+        conn.commit()
+    finally:
+        cursor.close()
+        connect_pg.disconnect(conn)
+
+
 def start_trip(trip_id, user_id) -> None:
     """Start the trip"""
     trip = get_trip_by_id(trip_id)
@@ -936,4 +984,58 @@ def create_daily_trips(
 
     # Commit pour sauvegarder les changements
     conn.commit()
+    connect_pg.disconnect(conn)
+
+
+def modify_trip(trip: TripBO) -> None:
+    """Modify the trip in the database"""
+
+    # Check if the address already exists
+    trip_exists(trip)
+    check_address_existence(trip.departure_address)
+    check_address_existence(trip.arrival_address)
+    validate_total_passenger_count(trip.total_passenger_count)
+    validate_timestamp_proposed(trip.timestamp_proposed)
+    validate_user_id(trip.user_id)
+    validate_address_departure_id_equals_address_arrival_id(
+        trip.departure_address, trip.arrival_address
+    )  # i need this function to check if the trip is viable
+
+    current_trip = get_trip_by_id(trip.id)
+    if current_trip["driver_id"] != trip.user_id:
+        raise ForbiddenException("ONLY_DRIVER_ALLOWED")
+    if current_trip["status"] != TripStatus.PENDING.value:
+        raise ForbiddenException("TRIP_NOT_PENDING")
+    if current_trip["passenger_count"] > 0:
+        raise ForbiddenException("TRIP_HAS_PASSENGERS")
+
+    query = (
+        "UPDATE uniride.ur_trip set t_total_passenger_count = %s , t_timestamp_proposed = %s , "
+        "t_address_departure_id = %s , t_address_arrival_id = %s WHERE t_id = %s"
+    )
+
+    values = (
+        trip.total_passenger_count,
+        trip.timestamp_proposed,
+        trip.departure_address.id,
+        trip.arrival_address.id,
+        trip.id,
+    )
+
+    conn = connect_pg.connect()
+    connect_pg.execute_command(conn, query, values)
+    connect_pg.disconnect(conn)
+
+    cancel_trip_booking(trip.id)
+
+
+def cancel_trip_booking(trip_id):
+    """Cancel all bookings for a trip"""
+    if not trip_id:
+        raise MissingInputException("TRIP_ID_MISSING")
+
+    conn = connect_pg.connect()
+    query = "UPDATE uniride.ur_join SET j_accepted = -1 WHERE t_id = %s"
+    values = (trip_id,)
+    connect_pg.execute_command(conn, query, values)
     connect_pg.disconnect(conn)

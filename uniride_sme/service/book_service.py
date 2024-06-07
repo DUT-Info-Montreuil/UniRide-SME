@@ -1,4 +1,5 @@
 """Book service module"""
+
 import random
 from datetime import datetime
 
@@ -9,16 +10,12 @@ from uniride_sme.model.dto.book_dto import BookDTO
 from uniride_sme.model.dto.trip_dto import TripShortDTO
 from uniride_sme.model.dto.user_dto import UserShortDTO
 from uniride_sme.service import trip_service
-from uniride_sme.utils.exception.exceptions import (
-    InvalidInputException,
-    MissingInputException,
-    ForbiddenException,
-)
 from uniride_sme.utils.exception.book_exceptions import (
-    TripAlreadyBookedException,
-    BookingNotFoundException,
-    BookingAlreadyRespondedException,
-)
+    BookingAlreadyRespondedException, BookingNotFoundException,
+    TripAlreadyBookedException)
+from uniride_sme.utils.exception.exceptions import (ForbiddenException,
+                                                    InvalidInputException,
+                                                    MissingInputException)
 from uniride_sme.utils.file import get_encoded_file
 
 

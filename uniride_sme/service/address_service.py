@@ -1,18 +1,15 @@
 """Address service module"""
 
 from datetime import datetime
+
 import requests
 
 from uniride_sme import connect_pg
 from uniride_sme.model.bo.address_bo import AddressBO
 from uniride_sme.utils.exception.address_exceptions import (
-    AddressNotFoundException,
-    InvalidAddressException,
-)
-from uniride_sme.utils.exception.exceptions import (
-    InvalidInputException,
-    MissingInputException,
-)
+    AddressNotFoundException, InvalidAddressException)
+from uniride_sme.utils.exception.exceptions import (InvalidInputException,
+                                                    MissingInputException)
 
 
 def add_address(address: AddressBO) -> AddressBO:

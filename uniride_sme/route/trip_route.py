@@ -1,17 +1,17 @@
 """Trip related routes"""
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity
 
-from uniride_sme.model.bo.trip_bo import TripBO
 from uniride_sme.model.bo.address_bo import AddressBO
-from uniride_sme.utils.exception.exceptions import ApiException
-from uniride_sme.utils.trip_status import TripStatus
-from uniride_sme.utils.field import validate_fields
-from uniride_sme.utils.pagination import create_pagination
+from uniride_sme.model.bo.trip_bo import TripBO
 from uniride_sme.service import trip_service
 from uniride_sme.utils.email import send_cancelation_email
+from uniride_sme.utils.exception.exceptions import ApiException
+from uniride_sme.utils.field import validate_fields
+from uniride_sme.utils.pagination import create_pagination
 from uniride_sme.utils.role_user import RoleUser, role_required
+from uniride_sme.utils.trip_status import TripStatus
 
 trip = Blueprint("trip", __name__, url_prefix="/trip")
 
@@ -117,6 +117,21 @@ def get_current_driver_trips():
         response = jsonify({"trips": available_trips, "meta": meta}), 200
     except ApiException as e:
         response = jsonify(message=e.message), e.status_code
+    return response
+
+
+@trip.route("/trip-management/<trip_id>", methods=["DELETE"])
+@role_required(RoleUser.DRIVER)
+def delete_trip_route(trip_id):
+    """Delete trip"""
+    try:
+        trip_service.delete_trip(trip_id)
+        response = jsonify({"message": "TRIP_DELETED_SUCCESSFULLY", "trip_id": trip_id}), 200
+    except ApiException as e:
+        response = jsonify({"message": e.message}), e.status_code
+    except Exception as e:
+        # Catch any other exceptions that may occur
+        response = jsonify({"message": "An unexpected error occurred"}), 500
     return response
 
 
@@ -252,4 +267,40 @@ def create_daily_trip():
         response = jsonify(message="DAILY_TRIP_CREATED_SUCCESSFULLY"), 200
     except ApiException as e:
         response = jsonify(message=e.message), e.status_code
+    return response
+
+
+@trip.route("/modify", methods=["POST"])
+@role_required(RoleUser.DRIVER)
+def modify_trip():
+    """Modify a trip endpoint"""
+    try:
+        user_id = get_jwt_identity()["id"]
+        json_object = request.json
+
+        validate_fields(
+            json_object,
+            {
+                "trip_id": int,
+                "total_passenger_count": int,
+                "timestamp_proposed": str,
+                "address_departure_id": int,
+                "address_arrival_id": int,
+            },
+        )
+
+        trip_bo = TripBO(
+            id=json_object.get("trip_id", None),
+            total_passenger_count=json_object.get("total_passenger_count", None),
+            timestamp_proposed=json_object.get("timestamp_proposed", None).strip(),
+            user_id=user_id,
+            departure_address=AddressBO(id=json_object.get("address_departure_id", None)),
+            arrival_address=AddressBO(id=json_object.get("address_arrival_id", None)),
+        )
+        trip_service.modify_trip(trip_bo)
+
+        response = jsonify({"message": "TRIP_MODIFIED_SUCCESSFULLY"}), 200
+    except ApiException as e:
+        response = jsonify(message=e.message), e.status_code
+
     return response
