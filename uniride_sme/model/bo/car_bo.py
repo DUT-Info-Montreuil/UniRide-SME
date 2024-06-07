@@ -1,8 +1,8 @@
 """ This module contains the CarBO class. """
 
 import dataclasses
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 
 @dataclasses.dataclass

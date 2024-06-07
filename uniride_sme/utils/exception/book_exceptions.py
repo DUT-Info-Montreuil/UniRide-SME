@@ -1,6 +1,7 @@
 """Exceptions for TripBO endpoints"""
 
-from uniride_sme.utils.exception.exceptions import ForbiddenException, InvalidInputException
+from uniride_sme.utils.exception.exceptions import (ForbiddenException,
+                                                    InvalidInputException)
 
 
 class TripAlreadyBookedException(ForbiddenException):

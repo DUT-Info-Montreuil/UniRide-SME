@@ -3,33 +3,30 @@
 from datetime import datetime, timedelta
 from math import ceil
 from typing import List
+
 from psycopg2.extras import execute_values
 
 from uniride_sme import app, connect_pg
-from uniride_sme.model.bo.trip_bo import TripBO
-from uniride_sme.model.dto.trip_dto import TripDTO, TripDetailedDTO, PassengerTripDTO
 from uniride_sme.model.bo.address_bo import AddressBO
+from uniride_sme.model.bo.trip_bo import TripBO
 from uniride_sme.model.dto.address_dto import AddressDTO, AddressSimpleDTO
-from uniride_sme.model.dto.user_dto import PassengerInfosDTO, PassengerEmailsDTO
+from uniride_sme.model.dto.trip_dto import (PassengerTripDTO, TripDetailedDTO,
+                                            TripDTO)
+from uniride_sme.model.dto.user_dto import (PassengerEmailsDTO,
+                                            PassengerInfosDTO)
 from uniride_sme.service.address_service import (
-    check_address_exigeance,
-    set_latitude_longitude_from_address,
-    address_exists,
-    check_address_existence,
-)
-from uniride_sme.utils.exception.exceptions import (
-    InvalidInputException,
-    MissingInputException,
-    ForbiddenException,
-)
-from uniride_sme.utils.exception.address_exceptions import InvalidIntermediateAddressException
+    address_exists, check_address_exigeance, check_address_existence,
+    set_latitude_longitude_from_address)
+from uniride_sme.utils.exception.address_exceptions import \
+    InvalidIntermediateAddressException
+from uniride_sme.utils.exception.exceptions import (ForbiddenException,
+                                                    InvalidInputException,
+                                                    MissingInputException)
 from uniride_sme.utils.exception.trip_exceptions import (
-    TripAlreadyExistsException,
-    TripNotFoundException,
-)
-from uniride_sme.utils.trip_status import TripStatus
-from uniride_sme.utils.maths_formulas import haversine
+    TripAlreadyExistsException, TripNotFoundException)
 from uniride_sme.utils.file import get_encoded_file
+from uniride_sme.utils.maths_formulas import haversine
+from uniride_sme.utils.trip_status import TripStatus
 
 
 def add_trip(trip: TripBO) -> None:
@@ -729,6 +726,7 @@ def _validate_start_time(departure_date) -> None:
     if departure_date + timedelta(minutes=15) < datetime.now():
         raise ForbiddenException("TOO_LATE_TO_START_TRIP")
 
+
 def delete_trip(trip_id) -> int:
     """Delete trip and perform related operations"""
     conn = connect_pg.connect()
@@ -740,11 +738,11 @@ def delete_trip(trip_id) -> int:
         WHERE t_id = %s
         """
         check_passenger_values = (trip_id,)
-        
+
         cursor = conn.cursor()
         cursor.execute(check_passenger_query, check_passenger_values)
         passenger_count = cursor.fetchone()[0]
-        
+
         if passenger_count == 0:
             # Step 1: Delete from ur_join where t_id = %s
             delete_join_query = """
@@ -779,7 +777,6 @@ def delete_trip(trip_id) -> int:
         cursor.close()
         connect_pg.disconnect(conn)
 
-        
 
 def start_trip(trip_id, user_id) -> None:
     """Start the trip"""

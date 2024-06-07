@@ -1,6 +1,7 @@
 """DTO for Book BO"""
 
 from typing import TypedDict
+
 from uniride_sme.model.dto.trip_dto import TripShortDTO
 from uniride_sme.model.dto.user_dto import UserShortDTO
 

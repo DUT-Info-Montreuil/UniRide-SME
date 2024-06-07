@@ -1,5 +1,6 @@
 """This module contains decorators for the app"""
 from functools import wraps
+
 from uniride_sme import app
 
 

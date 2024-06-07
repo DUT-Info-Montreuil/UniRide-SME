@@ -1,17 +1,17 @@
 """Trip related routes"""
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity
 
-from uniride_sme.model.bo.trip_bo import TripBO
 from uniride_sme.model.bo.address_bo import AddressBO
-from uniride_sme.utils.exception.exceptions import ApiException
-from uniride_sme.utils.trip_status import TripStatus
-from uniride_sme.utils.field import validate_fields
-from uniride_sme.utils.pagination import create_pagination
+from uniride_sme.model.bo.trip_bo import TripBO
 from uniride_sme.service import trip_service
 from uniride_sme.utils.email import send_cancelation_email
+from uniride_sme.utils.exception.exceptions import ApiException
+from uniride_sme.utils.field import validate_fields
+from uniride_sme.utils.pagination import create_pagination
 from uniride_sme.utils.role_user import RoleUser, role_required
+from uniride_sme.utils.trip_status import TripStatus
 
 trip = Blueprint("trip", __name__, url_prefix="/trip")
 
@@ -119,6 +119,7 @@ def get_current_driver_trips():
         response = jsonify(message=e.message), e.status_code
     return response
 
+
 @trip.route("/trip-management/<trip_id>", methods=["DELETE"])
 @role_required(RoleUser.DRIVER)
 def delete_trip_route(trip_id):
@@ -132,8 +133,6 @@ def delete_trip_route(trip_id):
         # Catch any other exceptions that may occur
         response = jsonify({"message": "An unexpected error occurred"}), 500
     return response
-
-
 
 
 @trip.route("/<trip_id>", methods=["GET"])

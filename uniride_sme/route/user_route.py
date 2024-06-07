@@ -1,24 +1,19 @@
 """User related endpoints"""
-from flask import Blueprint, request, jsonify, send_file, make_response
-from flask_jwt_extended import (
-    get_jwt_identity,
-    jwt_required,
-    create_access_token,
-    set_access_cookies,
-    create_refresh_token,
-    set_refresh_cookies,
-    unset_jwt_cookies,
-    verify_jwt_in_request,
-)
+from flask import Blueprint, jsonify, make_response, request, send_file
+from flask_jwt_extended import (create_access_token, create_refresh_token,
+                                get_jwt_identity, jwt_required,
+                                set_access_cookies, set_refresh_cookies,
+                                unset_jwt_cookies, verify_jwt_in_request)
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from jwt import ExpiredSignatureError
 
 from uniride_sme import app
-from uniride_sme.service import user_service, documents_service
-from uniride_sme.model.dto.user_dto import UserInfosDTO, DriverInfosDTO
-from uniride_sme.utils.exception.exceptions import ApiException
-from uniride_sme.utils.exception.user_exceptions import EmailAlreadyVerifiedException
+from uniride_sme.model.dto.user_dto import DriverInfosDTO, UserInfosDTO
+from uniride_sme.service import documents_service, user_service
 from uniride_sme.utils import email
+from uniride_sme.utils.exception.exceptions import ApiException
+from uniride_sme.utils.exception.user_exceptions import \
+    EmailAlreadyVerifiedException
 from uniride_sme.utils.file import get_encoded_file
 from uniride_sme.utils.jwt_token import revoke_token
 from uniride_sme.utils.role_user import RoleUser, role_required
@@ -291,6 +286,20 @@ def insurance():
     return save_document("insurance")
 
 
+@user.route("/add/end-date", methods=["POST"])
+@jwt_required()
+def add_end_date_insurance():
+    """Add end date of insurance car endpoint."""
+    try:
+        user_id = get_jwt_identity()["id"]
+        json_object = request.json
+        documents_service.add_end_date_insurance(json_object.get("end_date_insurance", None), user_id)
+        response = jsonify(message="ADD_END_DATE_SUCCESSFULLY"), 200
+    except ApiException as e:
+        response = jsonify(message=e.message), e.status_code
+    return response
+
+
 @user.route("/email-confirmation", methods=["GET"])
 @jwt_required()
 def send_email_confirmation():
@@ -360,7 +369,7 @@ def get_driver_infos(user_id):
             firstname=user_bo.firstname,
             lastname=user_bo.lastname,
             description=user_bo.description,
-            profile_picture=get_encoded_file(user_bo.profile_picture, "PFP_UPLOAD_FOLDER")
+            profile_picture=get_encoded_file(user_bo.profile_picture, "PFP_UPLOAD_FOLDER"),
         )
         response = jsonify(user_infos_dto), 200
     except ApiException as e:
@@ -390,6 +399,7 @@ def get_label(trip_id):
         response = jsonify(message=e.message), e.status_code
     return response
 
+
 @user.route("/infos/<user_id>", methods=["GET"])
 @role_required()
 def user_information_token(user_id):
@@ -397,13 +407,13 @@ def user_information_token(user_id):
     try:
         user_bo = user_service.get_user_by_id(user_id)
         user_infos_dto = DriverInfosDTO(
-                    id=user_bo.id,
-                    firstname=user_bo.firstname,
-                    lastname=user_bo.lastname,
-                    gender=user_bo.gender,
-                    phone_number=user_bo.phone_number,
-                    description=user_bo.description,
-                    profile_picture=get_encoded_file(user_bo.profile_picture, "PFP_UPLOAD_FOLDER")
+            id=user_bo.id,
+            firstname=user_bo.firstname,
+            lastname=user_bo.lastname,
+            gender=user_bo.gender,
+            phone_number=user_bo.phone_number,
+            description=user_bo.description,
+            profile_picture=get_encoded_file(user_bo.profile_picture, "PFP_UPLOAD_FOLDER"),
         )
         response = (
             jsonify({"message": "USER_INFORMATIONS_DISPLAYED_SUCESSFULLY", "user_information": user_infos_dto}),

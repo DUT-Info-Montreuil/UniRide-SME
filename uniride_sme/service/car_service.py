@@ -1,11 +1,14 @@
 """Car service module"""
 
 import psycopg2 as psy
+
 from uniride_sme import connect_pg
 from uniride_sme.model.bo.car_bo import CarBO
 from uniride_sme.model.dto.car_dto import CarDTO
-from uniride_sme.utils.exception.exceptions import InvalidInputException, MissingInputException
-from uniride_sme.utils.exception.car_exceptions import CarAlreadyExist, CarNotFoundException
+from uniride_sme.utils.exception.car_exceptions import (CarAlreadyExist,
+                                                        CarNotFoundException)
+from uniride_sme.utils.exception.exceptions import (InvalidInputException,
+                                                    MissingInputException)
 
 
 def add_car(car: CarBO) -> None:

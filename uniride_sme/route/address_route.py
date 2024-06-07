@@ -1,6 +1,7 @@
 """Adress related routes"""
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
+
 from uniride_sme import app
 from uniride_sme.model.bo.address_bo import AddressBO
 from uniride_sme.service import address_service
