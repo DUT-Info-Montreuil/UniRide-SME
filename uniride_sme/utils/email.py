@@ -1,4 +1,5 @@
 """Email related functions"""
+
 import os
 
 from flask_mail import Message
@@ -41,7 +42,7 @@ def send_verification_email(student_email, firstname, first_mail=False):
     else:
         file_path = os.path.join(app.config["PATH"], "resource/email/email_verification_template.html")
 
-    url = app.config["FRONT_END_URL"] + "email/" + generate_token(student_email)
+    url = app.config["FRONT_END_URL"] + "/email/" + generate_token(student_email)
     with open(file_path, "r", encoding="UTF-8") as html:
         content = html.read().replace("{firstname}", firstname).replace("{url}", url)
     send_email(student_email, "Vérifier votre adresse e-mail", content)
@@ -51,7 +52,7 @@ def send_password_change_email(student_email, firstname):
     """Send verification email"""
     file_path = os.path.join(app.config["PATH"], "resource/email/email_password_change_template.html")
 
-    url = app.config["FRONT_END_URL"] + "change-password/" + generate_token(student_email)
+    url = app.config["FRONT_END_URL"] + "/change-password/" + generate_token(student_email)
     with open(file_path, "r", encoding="UTF-8") as html:
         content = html.read().replace("{firstname}", firstname).replace("{url}", url)
     send_email(student_email, "Réinitialiser votre mot de passe", content)
@@ -61,7 +62,7 @@ def send_reservation_response_email(student_email, firstname, trip_id):
     """Send reservation response email"""
     file_path = os.path.join(app.config["PATH"], "resource/email/email_reservation_response_template.html")
 
-    url = f"{app.config['FRONT_END_URL']}trips/{trip_id}"
+    url = f"{app.config['FRONT_END_URL']}/trips/{trip_id}"
 
     with open(file_path, "r", encoding="UTF-8") as html:
         content = html.read().replace("{firstname}", firstname).replace("{url}", url)
@@ -73,7 +74,7 @@ def send_cancelation_email(student_email, firstname, trip_id):
     """Send reservation response email"""
     file_path = os.path.join(app.config["PATH"], "resource/email/email_cancelation_template.html")
 
-    url = f"{app.config['FRONT_END_URL']}trips/{trip_id}"
+    url = f"{app.config['FRONT_END_URL']}/trips/{trip_id}"
 
     with open(file_path, "r", encoding="UTF-8") as html:
         content = html.read().replace("{firstname}", firstname).replace("{url}", url)
