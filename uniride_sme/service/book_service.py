@@ -134,6 +134,7 @@ def respond_booking(trip_id, driver_id, booker_id, response) -> None:
     _validate_booking_status(booking.accepted)
 
     query = "UPDATE uniride.ur_join SET"
+    values = ()
 
     if response == 1:
         _validate_passenger_count(trip, booking.passenger_count)
