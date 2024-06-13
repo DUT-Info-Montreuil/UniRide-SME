@@ -325,7 +325,7 @@ def document_check(data):
 
 def update_role(user_id, column=None) -> None:
     """Update r_id to 1 if both v_license_verified and v_id_card_verified are 1"""
-    user_bo = user_service.get_label(user_id)
+    user_bo = user_service.get_user_by_id(user_id)
     conn = connect_pg.connect()
     query = """
     SELECT v_license_verified, v_id_card_verified, v_school_certificate_verified, v_insurance_verified, d_license, d_id_card, d_school_certificate, d_insurance
