@@ -1,12 +1,12 @@
 """User service module"""
+
 import re
 
 import bcrypt
 
 from uniride_sme import app, connect_pg
 from uniride_sme.model.bo.user_bo import UserBO
-from uniride_sme.service import admin_service
-from uniride_sme.service.documents_service import update_role
+from uniride_sme.service import admin_service, documents_service
 from uniride_sme.service.trip_service import get_trip_by_id
 from uniride_sme.utils.exception.exceptions import InvalidInputException, MissingInputException
 from uniride_sme.utils.exception.user_exceptions import (
@@ -265,8 +265,7 @@ def verify_student_email(student_email) -> None:
 
     connect_pg.execute_command(conn, query, (student_email,))
     connect_pg.disconnect(conn)
-    user_bo = get_user_by_id(email_verified[0][1])
-    update_role(user_bo)
+    documents_service.update_role(email_verified[0][1])
 
 
 def _validate_firstname(firstname) -> None:

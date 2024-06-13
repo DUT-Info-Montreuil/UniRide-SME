@@ -4,7 +4,7 @@ from datetime import datetime
 
 from uniride_sme import app, connect_pg
 from uniride_sme.model.bo.documents_bo import DocumentsBO
-from uniride_sme.service import admin_service
+from uniride_sme.service import admin_service, user_service
 from uniride_sme.utils.exception.documents_exceptions import (
     DocumentsNotFoundException, DocumentsTypeException)
 from uniride_sme.utils.exception.exceptions import MissingInputException
@@ -323,9 +323,9 @@ def document_check(data):
     return {"message": "DOCUMENT_STATUS_UPDATED"}
 
 
-def update_role(user_bo, column=None) -> None:
+def update_role(user_id, column=None) -> None:
     """Update r_id to 1 if both v_license_verified and v_id_card_verified are 1"""
-
+    user_bo = user_service.get_label(user_id)
     conn = connect_pg.connect()
     query = """
     SELECT v_license_verified, v_id_card_verified, v_school_certificate_verified, v_insurance_verified, d_license, d_id_card, d_school_certificate, d_insurance
