@@ -288,7 +288,7 @@ def _validate_name(name, name_type) -> None:
     if len(name) > 50:
         raise InvalidInputException(f"{name_type}_TOO_LONG")
 
-    regex = r"[A-Za-z-\s]+"
+    regex = r"[A-zÀ-ÿ-\s]+"
     if not re.fullmatch(regex, name):
         raise InvalidInputException(f"{name_type}_INVALID_CHARACTERS")
 
