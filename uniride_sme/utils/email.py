@@ -3,8 +3,7 @@
 import os
 
 from flask_mail import Message
-from itsdangerous import (BadTimeSignature, SignatureExpired,
-                          URLSafeTimedSerializer)
+from itsdangerous import BadTimeSignature, SignatureExpired, URLSafeTimedSerializer
 
 from uniride_sme import app, mail, rq
 from uniride_sme.utils.decorator import with_app_context
@@ -29,7 +28,7 @@ def send_insurance_expiration_email(student_email, firstname):
     """Send insurance expiration email"""
     file_path = os.path.join(app.config["PATH"], "resource/email/email_expiration_insurance_template.html")
 
-    url = app.config["FRONT_END_URL"] + "renew-insurance"
+    url = app.config["FRONT_END_URL"] + "/profil-information"
     with open(file_path, "r", encoding="UTF-8") as html:
         content = html.read().replace("{firstname}", firstname).replace("{url}", url)
     send_email(student_email, "Votre assurance arrive à expiration", content)

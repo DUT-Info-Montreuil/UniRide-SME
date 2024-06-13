@@ -6,8 +6,7 @@ import os
 from datetime import datetime
 
 from flask import jsonify
-from flask_jwt_extended import (create_access_token, get_jwt, get_jwt_identity,
-                                set_access_cookies)
+from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity, set_access_cookies
 
 from uniride_sme import app
 from uniride_sme.route.about_route import about

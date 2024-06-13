@@ -8,11 +8,12 @@ from uniride_sme.model.bo.user_bo import UserBO
 from uniride_sme.service import admin_service
 from uniride_sme.service.documents_service import update_role
 from uniride_sme.service.trip_service import get_trip_by_id
-from uniride_sme.utils.exception.exceptions import (InvalidInputException,
-                                                    MissingInputException)
+from uniride_sme.utils.exception.exceptions import InvalidInputException, MissingInputException
 from uniride_sme.utils.exception.user_exceptions import (
-    AttributeUnchangedException, PasswordIncorrectException,
-    UserNotFoundException)
+    AttributeUnchangedException,
+    PasswordIncorrectException,
+    UserNotFoundException,
+)
 from uniride_sme.utils.file import delete_file, save_file
 
 

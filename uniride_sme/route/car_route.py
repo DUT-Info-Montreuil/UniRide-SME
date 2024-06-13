@@ -3,10 +3,12 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity
 
 from uniride_sme.model.bo.car_bo import CarBO
-from uniride_sme.service.car_service import (add_car,
-                                             format_get_information_car,
-                                             get_car_info_by_user_id,
-                                             update_car_information_in_db)
+from uniride_sme.service.car_service import (
+    add_car,
+    format_get_information_car,
+    get_car_info_by_user_id,
+    update_car_information_in_db,
+)
 from uniride_sme.utils.exception.exceptions import ApiException
 from uniride_sme.utils.field import validate_fields
 from uniride_sme.utils.role_user import RoleUser, role_required
