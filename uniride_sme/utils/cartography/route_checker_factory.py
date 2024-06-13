@@ -1,9 +1,7 @@
 """Factory for creating instances of RouteChecker"""
 
-from uniride_sme.utils.cartography.google_maps_route_checker import \
-    GoogleMapsRouteChecker
-from uniride_sme.utils.cartography.open_street_map_route_checker import \
-    OpenStreetMapRouteChecker
+from uniride_sme.utils.cartography.google_maps_route_checker import GoogleMapsRouteChecker
+from uniride_sme.utils.cartography.open_street_map_route_checker import OpenStreetMapRouteChecker
 from uniride_sme.utils.exception.exceptions import MissingInputException
 
 

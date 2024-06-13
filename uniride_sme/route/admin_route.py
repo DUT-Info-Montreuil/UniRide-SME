@@ -6,11 +6,9 @@ from flask import Blueprint, jsonify, request
 from uniride_sme import app
 from uniride_sme.model.dto.trip_dto import TripStatusDTO
 from uniride_sme.model.dto.user_dto import InformationsStatUsers
-from uniride_sme.service import (admin_service, documents_service,
-                                 trip_service, user_service)
+from uniride_sme.service import admin_service, documents_service, trip_service, user_service
 from uniride_sme.utils import email
-from uniride_sme.utils.background_task.cron import (background_task,
-                                                    thread_event)
+from uniride_sme.utils.background_task.cron import background_task, thread_event
 from uniride_sme.utils.exception.exceptions import ApiException
 from uniride_sme.utils.role_user import RoleUser, role_required
 
