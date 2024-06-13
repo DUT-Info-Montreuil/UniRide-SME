@@ -11,11 +11,11 @@ from uniride_sme.model.dto.trip_dto import TripShortDTO
 from uniride_sme.model.dto.user_dto import UserShortDTO
 from uniride_sme.service import trip_service
 from uniride_sme.utils.exception.book_exceptions import (
-    BookingAlreadyRespondedException, BookingNotFoundException,
-    TripAlreadyBookedException)
-from uniride_sme.utils.exception.exceptions import (ForbiddenException,
-                                                    InvalidInputException,
-                                                    MissingInputException)
+    BookingAlreadyRespondedException,
+    BookingNotFoundException,
+    TripAlreadyBookedException,
+)
+from uniride_sme.utils.exception.exceptions import ForbiddenException, InvalidInputException, MissingInputException
 from uniride_sme.utils.file import get_encoded_file
 
 

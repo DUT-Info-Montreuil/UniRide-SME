@@ -4,8 +4,7 @@ from datetime import datetime
 
 from uniride_sme import app
 from uniride_sme.model.bo.address_bo import AddressBO
-from uniride_sme.utils.cartography.route_checker_factory import \
-    RouteCheckerFactory
+from uniride_sme.utils.cartography.route_checker_factory import RouteCheckerFactory
 
 
 @dataclasses.dataclass

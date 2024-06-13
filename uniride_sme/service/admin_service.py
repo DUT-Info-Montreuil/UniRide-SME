@@ -1,13 +1,11 @@
 """Admin service module"""
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 
 from uniride_sme import connect_pg
 from uniride_sme.utils import email
-from uniride_sme.utils.exception.criteria_exceptions import \
-    TooManyCriteriaException
+from uniride_sme.utils.exception.criteria_exceptions import TooManyCriteriaException
 from uniride_sme.utils.exception.exceptions import InvalidInputException
-from uniride_sme.utils.exception.user_exceptions import (
-    RatingNotFoundException, UserNotFoundException)
+from uniride_sme.utils.exception.user_exceptions import RatingNotFoundException, UserNotFoundException
 from uniride_sme.utils.file import get_encoded_file
 
 
@@ -448,8 +446,8 @@ def update_insurance_verified(id_user):
     query = "UPDATE uniride.ur_document_verification SET v_insurance_verified=0 WHERE u_id = %s"
     connect_pg.execute_command(conn, query, (id_user,))
     connect_pg.disconnect(conn)
-    
-    
+
+
 def update_user_role(id_user):
     """update user role verified"""
     conn = connect_pg.connect()
@@ -467,22 +465,22 @@ def send_mail_expiration_and_update_insurance():
     result = connect_pg.get_query(conn, query)
     for row in result:
         u_id = row[0]
-        end_date_insurance = row[1]   
-        
+        end_date_insurance = row[1]
+
         if end_date_insurance is not None:
             query_user = """
             SELECT u_student_email, u_firstname FROM uniride.ur_user where u_id='%s'
             """
-            result_user = connect_pg.get_query(conn, query_user,(u_id,))
+            result_user = connect_pg.get_query(conn, query_user, (u_id,))
             if result_user:
                 user_email = result_user[0][0]
-                user_firstname = result_user[0][1]  
+                user_firstname = result_user[0][1]
                 difference = end_date_insurance - datetime.today().date()
                 if difference == timedelta(days=15):
-                    email.send_insurance_expiration_email(user_email,user_firstname)
+                    email.send_insurance_expiration_email(user_email, user_firstname)
                 if difference == timedelta(days=5):
-                    email.send_insurance_expiration_email(user_email,user_firstname)
-                
+                    email.send_insurance_expiration_email(user_email, user_firstname)
+
         if end_date_insurance == datetime.today().date():
             update_insurance_verified(u_id)
             update_user_role(u_id)

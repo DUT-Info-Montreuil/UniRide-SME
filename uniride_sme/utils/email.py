@@ -3,8 +3,7 @@
 import os
 
 from flask_mail import Message
-from itsdangerous import (BadTimeSignature, SignatureExpired,
-                          URLSafeTimedSerializer)
+from itsdangerous import BadTimeSignature, SignatureExpired, URLSafeTimedSerializer
 
 from uniride_sme import app, mail, rq
 from uniride_sme.utils.decorator import with_app_context
