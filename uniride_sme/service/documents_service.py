@@ -4,7 +4,7 @@ from datetime import datetime
 
 from uniride_sme import app, connect_pg
 from uniride_sme.model.bo.documents_bo import DocumentsBO
-from uniride_sme.service import admin_service, user_service
+from uniride_sme.service import admin_service
 from uniride_sme.utils.exception.documents_exceptions import (
     DocumentsNotFoundException, DocumentsTypeException)
 from uniride_sme.utils.exception.exceptions import MissingInputException
@@ -323,10 +323,8 @@ def document_check(data):
     return {"message": "DOCUMENT_STATUS_UPDATED"}
 
 
-def update_role(user_id, column=None) -> None:
+def update_role(user_bo, column=None) -> None:
     """Update r_id to 1 if both v_license_verified and v_id_card_verified are 1"""
-
-    user_bo = user_service.get_user_by_id(user_id)
 
     conn = connect_pg.connect()
     query = """
@@ -335,7 +333,7 @@ def update_role(user_id, column=None) -> None:
     NATURAL JOIN uniride.ur_documents
     Where u_id = %s
     """
-    documents = connect_pg.get_query(conn, query, (user_id,), True)
+    documents = connect_pg.get_query(conn, query, (user_bo.id,), True)
     if column and documents[0].get(column) == 1:
         match column:
             case "v_license_verified":
@@ -366,7 +364,7 @@ def update_role(user_id, column=None) -> None:
     WHERE u_id = %s
     """
 
-    connect_pg.execute_command(conn, r_id_query, (user_id,))
+    connect_pg.execute_command(conn, r_id_query, (user_bo.id,))
 
     connect_pg.disconnect(conn)
 

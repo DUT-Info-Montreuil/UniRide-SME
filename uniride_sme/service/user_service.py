@@ -264,8 +264,8 @@ def verify_student_email(student_email) -> None:
 
     connect_pg.execute_command(conn, query, (student_email,))
     connect_pg.disconnect(conn)
-
-    update_role(email_verified[0][1])
+    user_bo = get_user_by_id(email_verified[0][1])
+    update_role(user_bo)
 
 
 def _validate_firstname(firstname) -> None:
