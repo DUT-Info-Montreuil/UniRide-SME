@@ -10,6 +10,6 @@ thread_event = threading.Event()
 
 def background_task():
     while thread_event.is_set():
-        schedule.every().day.at("15:19").do(admin_service.get_end_date_insurance)
+        schedule.every().day.at("00:00").do(admin_service.send_mail_expiration_and_update_insurance)
         schedule.run_pending()
         sleep(30)
