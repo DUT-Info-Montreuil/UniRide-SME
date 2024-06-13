@@ -1,5 +1,6 @@
 """Configure database connection"""
 # !/usr/bin/python
+from ast import literal_eval
 import dataclasses
 import os
 from configparser import ConfigParser, NoSectionError
@@ -88,7 +89,7 @@ class Config:
     ACCEPT_TIME_DIFFERENCE_MINUTES = int(os.getenv("ACCEPT_TIME_DIFFERENCE_MINUTES"))
 
     # FLask configuration
-    FLASK_DEBUG = os.getenv("FLASK_DEBUG")
+    FLASK_DEBUG = literal_eval(os.getenv("FLASK_DEBUG"))
     FLASK_HOST = os.getenv("FLASK_HOST")
     FLASK_PORT = os.getenv("FLASK_PORT")
 
